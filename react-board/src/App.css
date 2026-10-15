@@ -1,0 +1,61 @@
+/* 검색 영역 추가 */
+.search-area {
+  margin-bottom: 15px;
+}
+
+/* 검색 입력창 */
+.search-area input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  font-size: 16px;
+  background: white;
+  outline: none;
+}
+
+/* 검색창을 클릭했을 때 (포커스 효과) */
+.search-area input:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+/* 검색 결과 개수 */
+.search-count {
+  margin-bottom: 20px;
+  text-align: right;
+  font-size: 14px;
+  font-weight: bold;
+  color: #64748b;
+}
+
+/* 검색된 게시글 카드 강조 */
+.post-card-search {
+  padding: 32px;
+  border: 2px solid #6366f1;
+  background: #ffffff;
+  transform: scale(1.02); /* 카드를 1.02배 확대 */
+}
+
+/* 검색된 게시글 제목 크고 진하게 */
+.post-card-search h2 {
+  font-size: 26px;
+  color: #312e81;
+}
+
+/* 검색된 게시글 내용 크고 시원하게 */
+.post-card-search p {
+  font-size: 17px;
+  line-height: 1.8;
+}
+
+/* 검색 결과가 단 하나도 없을 때 */
+.no-result {
+  margin-top: 30px;
+  padding: 20px;
+  text-align: center;
+  background: white;
+  border-radius: 10px;
+  color: #94a3b8;
+  font-weight: bold;
+}
