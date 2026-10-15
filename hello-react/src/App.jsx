@@ -1,146 +1,90 @@
-import { useState } from 'react'
-import { Navigate, useNavigate } from 'react-router-dom'
-import './App.css' 
+import { useEffect, useState } from 'react'
+import './App.css'
 
-function App() {
-  const navigate = useNavigate()
-  const [users, setUsers] = useState([
-    {id: 1, name: '홍길동', point: 8500},
-    {id: 2, name: '김철수', point: 12000},
-    {id: 3, name: '이영희', point: 5500}])
+export default function App() {
+  const [posts, setPosts] = useState([])       // 게시글 목록 저장
+  const [loading, setLoading] = useState(true) // 데이터 로딩 상태
+  const [search, setSearch] = useState('')     // 검색어 저장
 
-  const [showGraph, setShowGraph] = useState(false)
-  const [selectedId, setSelectedId] = useState('1')
-  const [pointType, setPointType] = useState('add')
-  const [amount, setAmount] = useState('')
-  const [message, setMessage] = useState('')
-  const isLogin = localStorage.getItem('isLogin')
-  const role = localStorage.getItem('role')
+  useEffect(() => {
+    // 💡 인터넷 서버(fetch) 대신 컴퓨터 내부에 가짜 데이터를 직접 심어줍니다.
+    // 이렇게 하면 네트워크 차단과 상관없이 무조건 화면이 켜집니다!
+    const mockData = [
+      {
+        id: 1,
+        title: "sunt aut facere repellat provident occaecati excepturi optio reprehenderit",
+        body: "quia et suscipit suscipit recusandae consequuntur expedita et cum reprehenderit molestiae ut ut quas totam\nnostrum rerum est autem sunt rem eveniet architecto"
+      },
+      {
+        id: 2,
+        title: "qui est esse",
+        body: "est rerum tempore vitae sequi sint nihil reprehenderit dolor beatae ea dolores neque fugiat blanditiis\nvoluptate porro vel nihil molestiae ut reiciendis qui aperiam non debitis possimus qui neque nisi nulla"
+      },
+      {
+        id: 3,
+        title: "ea molestias quasi exercitationem repellat qui ipsa sit aut",
+        body: "et iusto sed quo iure voluptatem occaecati omnis eligendi aut ad voluptatem doloribus vel accusantium\nquis pariatur molestiae porro eius odio et labore et velit aut"
+      }
+    ];
 
-  if (isLogin !== 'true' || role !== 'admin') {
-    return <Navigate to="/" replace />
-  }
+    setPosts(mockData); // 데이터를 즉시 저장
+    setLoading(false);  // 로딩 상태 즉시 완료 처리
+  }, [])
 
-  const points = users.map((user) => user.point);
-  const maxPoint = Math.max(Math.max.apply(null, points), 1);
-  const handlePointUpdate = () => {
-    const pointValue = Number (amount)
-    const userId = Number(selectedId)
-    if (amount === '' || pointValue <= 0) {
-      setMessage('1 이상의 포인트를 입력하세요.')
-      return      
-    }
+  // 실시간 검색어 필터링 로직 (23p)
+  const filteredPosts = posts.filter((post) =>
+    post.title.toLowerCase().includes(search.toLowerCase())
+  )
 
-    const selectedUser = users.find(
-      (user) => user.id === userId
+  if (loading) {
+    return (
+      <main className="page">
+        <p>불러오는 중...</p>
+      </main>
     )
-
-    if (pointType === 'subtract' && pointValue > selectedUser.point) {
-      setMessage('현재 보유 포인트보다 많이 차감할 수 없습니다.')
-      return
-    }
-
-    setUsers(
-      users.map((user) => {
-        if (user.id !== userId) {
-          return user
-        }
-
-        let newPoint 
-
-        if (pointType === 'add') {
-          newPoint = user.point + pointValue
-        } else {
-          newPoint = user.point - pointValue
-        }
-        return Object.assign({}, user, { point: newPoint })
-      })
-    )
-
-    setMessage('포인트가 정상적으로 반영되었습니다.')
-
-    setAmount('')    
   }
 
-  // 8. 로그아웃 함수
-  const handleLogout = () => {
-    localStorage.removeItem('isLogin') // 로그인 정보 삭제
-    localStorage.removeItem('role') // 사용자 권한 정보 삭제
-    navigate('/') // 로그인 화면으로 이동
-  }
+  return (
+    <main className="page">
+      <h1>React 게시판</h1>
 
-  // 9. 화면 출력
-  return (// 관리자 화면 전체 영역
-    <main className="admin-page">
-      <h1>관리자 포인트 관리</h1>
-      <section className="point-control">
-        <h2>포인트 지급·차감</h2>
-        <div className="point-form">
-          <label>사용자 선택</label>
-          <select value={selectedId}
-            // 사용자를 변경하면 selectedId 변경
-            onChange={(e) => setSelectedId(e.target.value)}>
-            {/* users 배열을 반복해서 option 생성 */}
-            {users.map((user) => (
-              <option key={user.id} value={user.id}>{user.name}</option>
-            ))}
-          </select>
-        </div>
-        <div className="point-form">{/* 적립 / 차감 선택 */}
-          <label>처리 유형</label>
-          <select value={pointType} // 현재 처리 유형
-            // 처리 유형 변경
-            onChange={(e) => setPointType(e.target.value)}>
-            <option value="add">포인트 적립</option>
-            <option value="subtract">포인트 차감</option>
-          </select>
-        </div>
-        <div className="point-form"> {/* 포인트 입력 */}
-          <label>포인트</label>
-          <input type="number" min="1" placeholder="포인트 입력" value={amount}
-            onChange={(e) => setAmount(e.target.value)}/>
-        </div>
-        <button className="apply-button" onClick={handlePointUpdate}>포인트 반영</button>
-        {message && (
-          <p className="result-message">{message}</p>
-        )}
-      </section>
-      <h2>사용자 목록</h2>
-      {users.map((user) => (
-        <div className="user-item" key={user.id}>
-          <span>{user.name}</span>
-          <strong>{user.point.toLocaleString()} P</strong>
-        </div>
-      ))}
-      <p className="user-count">전체 사용자: {users.length}명</p>
-      <div className="button-area">
-        <button
-          // 현재 showGraph 값을 반대로 변경
-          onClick={() => setShowGraph(!showGraph)}>
-          {/* showGraph가 true이면 그래프 닫기 false이면 그래프 보기 */}
-          {showGraph ? '그래프 닫기' : '그래프 보기'}
-        </button>
-        <button onClick={handleLogout}>로그아웃</button>
+      {/* 24p: 게시글 검색 입력창 */}
+      <div className="search-area">
+        <input 
+          type="text" 
+          placeholder="게시글 제목 검색" 
+          value={search}
+          onChange={(e) => setSearch(e.target.value)} // 글자 입력 시 search 값 변경
+        />
       </div>
-      {showGraph && (
-        <section className="graph-area">
-          <h2>사용자별 포인트 그래프</h2>
-          {users.map((user) => (
-            <div className="graph-row" key={user.id}>
-              <span className="graph-name">{user.name}</span>
-              <div className="graph-background">
-                <div className="graph-bar"
-                  style={{width: `${(user.point / maxPoint) * 100}%`}}>
-                </div>
-              </div>
-              <strong>{user.point.toLocaleString()} P</strong>
-            </div>
-          ))}
-        </section>
+
+      {/* 24p: 검색 결과 개수 */}
+      <p className="search-count">
+        검색 결과 : { ' ' } {filteredPosts.length}개
+      </p>
+
+      {/* 24p: 필터링된 결과 반복 출력 */}
+      {filteredPosts.map((post) => (
+        <article
+          key={post.id}
+          // 25p: 검색어가 입력되면 강조 스타일(post-card-search) 적용
+          className={search !== '' ? 'post-card post-card-search' : 'post-card'}
+        >
+          {/* 20p: 게시글 번호 표시 */}
+          <span className="post-number">
+            게시글 #{post.id}
+          </span>
+          <h2>{post.title}</h2>
+          <p>{post.body}</p>
+        </article>
+      ))}
+
+      {/* 24p: 검색 결과가 없을 경우 예외 처리 */}
+      {filteredPosts.length === 0 && (
+        <p className="no-result">
+          검색 결과가 없습니다.
+        </p>
       )}
     </main>
   )
 }
-
-// main.jsx에서 App을 가져다 사용할 수 있도록 설정
-export default App
